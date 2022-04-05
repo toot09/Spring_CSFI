@@ -9,8 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 @Slf4j
 @Controller
@@ -40,10 +42,37 @@ public class HomeController {
         return "loginHome";
     }
 
-    @GetMapping("/")
+//    @GetMapping("/")
     public String homeLoginV2(HttpServletRequest request, Model model) {
         Member member = (Member)sessionManager.getSession(request);
 
+        if(member==null) {
+            return "home";
+        }
+
+        //로그인
+        model.addAttribute("member", member);
+        return "loginHome";
+    }
+
+//    @GetMapping("/")
+    public String homeLoginV3(HttpServletRequest request, Model model) {
+        HttpSession session = request.getSession(false);
+        if(session==null) {
+            return "home";
+        }
+
+        Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMEBER);
+
+        //로그인
+        model.addAttribute("member", member);
+        return "loginHome";
+    }
+
+    @GetMapping("/")
+    public String homeLoginV3(@SessionAttribute(name=SessionConst.LOGIN_MEMEBER, required = false) Member member, Model model) {
+
+        // 세션에 회원 정보가 없다면 기본 홈
         if(member==null) {
             return "home";
         }
